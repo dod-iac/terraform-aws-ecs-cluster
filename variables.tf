@@ -53,24 +53,24 @@ variable "root_block_device_volume_size" {
   default     = 32
 }
 
-variable "target_capacity" {
-  type        = number
-  description = "The target utilization for the capacity provider. A number between 1 and 100."
-  default     = 50
-}
-
 variable "subnet_ids" {
   type        = list(string)
   description = "The ids of the VPC subnets used by the EC2 instances in the ECS cluster."
-}
-
-variable "vpc_id" {
-  type        = string
-  description = "The id of the VPC used by the EC2 instances in the ECS cluster."
 }
 
 variable "tags" {
   type        = map(string)
   description = "Tags applied to resources part of the ECS Cluster."
   default     = {}
+}
+
+variable "target_capacity" {
+  type        = number
+  description = "The target utilization for the capacity provider. A number between 1 and 100."
+  default     = 50
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "The id of the VPC used by the EC2 instances in the ECS cluster."
 }
