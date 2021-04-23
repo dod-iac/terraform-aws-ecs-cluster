@@ -37,7 +37,10 @@
  * }
  * ```
  *
+ * Changes to the desired_capacity, min_size, and max_size configuration of the Auto Scaling group are ignored by Terraform.  These parameters can be updated via the AWS Console, API, or CLI.
+ *
  * To connect to an EC2 instance that is part of the ECS cluster, set the subnet_ids to public subnets and set the key_name to the name of a key pair.
+ *
  *
  * ## Terraform Version
  *
@@ -114,7 +117,7 @@ resource "aws_autoscaling_group" "main" {
 
   lifecycle {
     create_before_destroy = true
-    ignore_changes        = [max_size, min_size]
+    ignore_changes        = [desired_capacity, max_size, min_size]
   }
 }
 
