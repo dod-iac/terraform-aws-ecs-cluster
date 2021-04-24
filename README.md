@@ -37,6 +37,8 @@ module "ecs_cluster" {
 }
 ```
 
+Changes to the desired\_capacity, min\_size, and max\_size configuration of the Auto Scaling group are ignored by Terraform.  These parameters can be updated via the AWS Console, API, or CLI.
+
 To connect to an EC2 instance that is part of the ECS cluster, set the subnet\_ids to public subnets and set the key\_name to the name of a key pair.
 
 ## Terraform Version
