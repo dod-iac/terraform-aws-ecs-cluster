@@ -41,6 +41,10 @@ Changes to the desired\_capacity, min\_size, and max\_size configuration of the 
 
 To connect to an EC2 instance that is part of the ECS cluster, set the subnet\_ids to public subnets and set the key\_name to the name of a key pair.
 
+## Testing
+
+Run all terratest tests using the `terratest` script.  If using `aws-vault`, you could use `aws-vault exec $AWS_PROFILE -- terratest`.  The `AWS_DEFAULT_REGION` environment variable is required by the tests.  Use `TT_SKIP_DESTROY=1` to not destroy the infrastructure created during the tests.  The go test command can be executed directly, too.
+
 ## Terraform Version
 
 Terraform 0.13. Pin module version to ~> 1.0.0 . Submit pull-requests to master branch.
