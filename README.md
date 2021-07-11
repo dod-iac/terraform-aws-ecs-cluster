@@ -37,7 +37,7 @@ module "ecs_cluster" {
 }
 ```
 
-By default, the ECS Cluster bootstraps Amazon Linux 2 images.  If using a custom AMI, modify the `user_data` variable as applicable.  If using AWS GovCloud, `ami-b1e0dad0` is equivalent to the default image in AWS commercial.
+By default, the ECS Cluster bootstraps Amazon Linux 2 images.  If using a custom AMI, modify the `image_id` and `user_data` variables as applicable.  If using AWS GovCloud, `ami-b1e0dad0` is equivalent to the default image in AWS commercial.
 
 Changes to the desired\_capacity, min\_size, and max\_size configuration of the Auto Scaling group are ignored by Terraform.  These parameters can be updated via the AWS Console, API, or CLI.
 
@@ -52,7 +52,7 @@ resource "aws_iam_service_linked_role" "ecs" {
 
 ## Testing
 
-Run all terratest tests using the `terratest` script.  If using `aws-vault`, you could use `aws-vault exec $AWS_PROFILE -- terratest`.  The `AWS_DEFAULT_REGION` environment variable is required by the tests.  Use `TT_SKIP_DESTROY=1` to not destroy the infrastructure created during the tests.  Use 'TT_VERBOSE=1' to log all tests as they are run.  The go test command can be executed directly, too.
+Run all terratest tests using the `terratest` script.  If using `aws-vault`, you could use `aws-vault exec $AWS_PROFILE -- terratest`.  The `AWS_DEFAULT_REGION` environment variable is required by the tests.  Use `TT_SKIP_DESTROY=1` to not destroy the infrastructure created during the tests.  Use `TT_VERBOSE=1` to log all tests as they are run.  The go test command can be executed directly, too.
 
 ## Known Issues
 

@@ -21,8 +21,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
+	"github.com/aws/aws-sdk-go/service/ecs"
 )
 
 func TestTerraformSimpleExample(t *testing.T) {
@@ -52,7 +52,7 @@ func TestTerraformSimpleExample(t *testing.T) {
 		// Set the variables passed to terraform
 		Vars: map[string]interface{}{
 			"test_name": testName,
-			"tags": tags,
+			"tags":      tags,
 		},
 		// Set the environment variables passed to terraform.
 		// AWS_DEFAULT_REGION is the only environment variable strictly required,
@@ -93,50 +93,50 @@ func TestTerraformSimpleExample(t *testing.T) {
 	status := aws.StringValue(describeClustersOutput.Clusters[0].Status)
 	require.Equal(t, "ACTIVE", status)
 
-  message := fmt.Sprintf("test message for %s", testName)
+	message := fmt.Sprintf("test message for %s", testName)
 
-  cloudwatchLogGroupName := terraform.Output(t, terraformOptions, "cloudwatch_log_group_name")
+	cloudwatchLogGroupName := terraform.Output(t, terraformOptions, "cloudwatch_log_group_name")
 	ecsTaskExecutionRoleArn := terraform.Output(t, terraformOptions, "ecs_task_execution_role_arn")
 	ecsTaskRoleArn := terraform.Output(t, terraformOptions, "ecs_task_role_arn")
 
 	registerTaskDefinitionOutput, registerTaskDefinitionError := c.RegisterTaskDefinition(&ecs.RegisterTaskDefinitionInput{
 		ContainerDefinitions: []*ecs.ContainerDefinition{
 			&ecs.ContainerDefinition{
-				Command: []*string{},
-				Cpu: aws.Int64(128),
+				Command:    []*string{},
+				Cpu:        aws.Int64(128),
 				EntryPoint: []*string{aws.String("/bin/echo"), aws.String(message)},
-				Essential: aws.Bool(true),
-				Image: aws.String("debian:latest"),
+				Essential:  aws.Bool(true),
+				Image:      aws.String("debian:latest"),
 				LogConfiguration: &ecs.LogConfiguration{
 					LogDriver: aws.String("awslogs"),
 					Options: map[string]*string{
-						"awslogs-group": aws.String(cloudwatchLogGroupName),
-						"awslogs-region": aws.String(region),
+						"awslogs-group":         aws.String(cloudwatchLogGroupName),
+						"awslogs-region":        aws.String(region),
 						"awslogs-stream-prefix": aws.String(testName),
 					},
 				},
-				Memory: aws.Int64(128),
-				Name: aws.String(testName),
+				Memory:                 aws.Int64(128),
+				Name:                   aws.String(testName),
 				ReadonlyRootFilesystem: aws.Bool(true),
-				StopTimeout: aws.Int64(5),
+				StopTimeout:            aws.Int64(5),
 			},
 		},
-		ExecutionRoleArn: aws.String(ecsTaskExecutionRoleArn),
-		TaskRoleArn: aws.String(ecsTaskRoleArn),
-		Family: aws.String(testName),
-		NetworkMode: aws.String("bridge"),
+		ExecutionRoleArn:        aws.String(ecsTaskExecutionRoleArn),
+		TaskRoleArn:             aws.String(ecsTaskRoleArn),
+		Family:                  aws.String(testName),
+		NetworkMode:             aws.String("bridge"),
 		RequiresCompatibilities: []*string{aws.String("EC2")},
 		Tags: []*ecs.Tag{
 			&ecs.Tag{
-				Key: aws.String("Automation"),
+				Key:   aws.String("Automation"),
 				Value: aws.String("Terraform"),
 			},
 			&ecs.Tag{
-				Key: aws.String("Terratest"),
+				Key:   aws.String("Terratest"),
 				Value: aws.String("yes"),
 			},
 			&ecs.Tag{
-				Key: aws.String("Test"),
+				Key:   aws.String("Test"),
 				Value: aws.String("TestTerraformSimpleExample"),
 			},
 		},
@@ -152,39 +152,39 @@ func TestTerraformSimpleExample(t *testing.T) {
 	if os.Getenv("TT_SKIP_DESTROY") != "1" {
 		defer func() {
 			_, _ = c.DeregisterTaskDefinition(&ecs.DeregisterTaskDefinitionInput{
-			 TaskDefinition:  aws.String(taskDefinition),
-		 })
-		} ()
+				TaskDefinition: aws.String(taskDefinition),
+			})
+		}()
 	}
 
 	// Wait for EC2-backed container instance to spin up.
-	for i := 0 ; true; i++ {
+	for i := 0; true; i++ {
 		listContainerInstancesOutput, listContainerInstancesError := c.ListContainerInstances(&ecs.ListContainerInstancesInput{
 			Cluster: aws.String(ecsClusterName),
-			Status: aws.String("ACTIVE"),
+			Status:  aws.String("ACTIVE"),
 		})
 		require.NoError(t, listContainerInstancesError)
 		if len(listContainerInstancesOutput.ContainerInstanceArns) > 0 {
 			break
 		}
-		time.Sleep(15*time.Second)
+		time.Sleep(15 * time.Second)
 		if i == 12 {
 			require.Fail(t, "ECS Cluster had no instances after 1 minute")
 		}
 	}
 
 	runTaskOutput, runTaskError := c.RunTask(&ecs.RunTaskInput{
-		Cluster: aws.String(ecsClusterName),
-		Count: aws.Int64(1),
-		LaunchType: aws.String("EC2"),
-		PropagateTags: aws.String("TASK_DEFINITION"),
+		Cluster:        aws.String(ecsClusterName),
+		Count:          aws.Int64(1),
+		LaunchType:     aws.String("EC2"),
+		PropagateTags:  aws.String("TASK_DEFINITION"),
 		TaskDefinition: aws.String(taskDefinition),
 	})
 	require.NoError(t, runTaskError)
 	require.Len(t, runTaskOutput.Failures, 0)
 
-  // Wait for log messages to be saved
-	time.Sleep(15*time.Second)
+	// Wait for log messages to be saved
+	time.Sleep(15 * time.Second)
 
 	filterLogEventsOutput, filterLogEventsError := logs.FilterLogEvents(&cloudwatchlogs.FilterLogEventsInput{
 		LogGroupName: aws.String(cloudwatchLogGroupName),
