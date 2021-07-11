@@ -13,6 +13,7 @@ amazon-linux-extras install -y ecs >> /var/log/startup.log 2>&1
 mkdir -p /etc/ecs
 echo 'ECS_CLUSTER=${ecs_cluster}' >> /etc/ecs/ecs.config
 echo 'ECS_DISABLE_PRIVILEGED=true' >> /etc/ecs/ecs.config
+echo 'ECS_CONTAINER_INSTANCE_TAGS=${jsonencode(tags)}' >> /etc/ecs/ecs.config
 # Update shell
 echo "export AWS_DEFAULT_REGION=${region}" >> /home/ec2-user/.bash_profile
 # Starting ECS Service

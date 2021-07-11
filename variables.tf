@@ -20,8 +20,9 @@ variable "iam_instance_profile" {
 }
 
 variable "image_id" {
-  type    = string
-  default = "ami-b1e0dad0"
+  type        = string
+  description = "The EC2 image ID to launch.  If using AWS GovCloud, \"ami-b1e0dad0\" is equivalent."
+  default     = "ami-0e999cbd62129e3b1"
 }
 
 variable "instance_type" {
@@ -68,6 +69,12 @@ variable "target_capacity" {
   type        = number
   description = "The target utilization for the capacity provider. A number between 1 and 100."
   default     = 50
+}
+
+variable "user_data" {
+  type        = string
+  description = "The user data provided when launching instances.  If not defined, the userdata.tpl template file is used."
+  default     = ""
 }
 
 variable "vpc_id" {

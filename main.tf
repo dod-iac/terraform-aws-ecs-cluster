@@ -37,13 +37,26 @@
  * }
  * ```
  *
+ * By default, the ECS Cluster bootstraps Amazon Linux 2 images.  If using a custom AMI, modify the `user_data` variable as applicable.  If using AWS GovCloud, `ami-b1e0dad0` is equivalent to the default image in AWS commercial.
+ *
  * Changes to the desired_capacity, min_size, and max_size configuration of the Auto Scaling group are ignored by Terraform.  These parameters can be updated via the AWS Console, API, or CLI.
  *
  * To connect to an EC2 instance that is part of the ECS cluster, set the subnet_ids to public subnets and set the key_name to the name of a key pair.
  *
+ * If you receive a `ECS Service Linked Role does not exist.` error, then you are missing the ECS service Linked Role for your AWS account.  This role only needs to be created once per acocunt, and can be created using the terraform resource shown below.
+ *
+ * ```hcl
+ * resource "aws_iam_service_linked_role" "ecs" {
+ *   aws_service_name = "ecs.amazonaws.com"
+ * }
+ *
  * ## Testing
  *
- * Run all terratest tests using the `terratest` script.  If using `aws-vault`, you could use `aws-vault exec $AWS_PROFILE -- terratest`.  The `AWS_DEFAULT_REGION` environment variable is required by the tests.  Use `TT_SKIP_DESTROY=1` to not destroy the infrastructure created during the tests.  The go test command can be executed directly, too.
+ * Run all terratest tests using the `terratest` script.  If using `aws-vault`, you could use `aws-vault exec $AWS_PROFILE -- terratest`.  The `AWS_DEFAULT_REGION` environment variable is required by the tests.  Use `TT_SKIP_DESTROY=1` to not destroy the infrastructure created during the tests.  Use 'TT_VERBOSE=1' to log all tests as they are run.  The go test command can be executed directly, too.
+ *
+ * ## Known Issues
+ *
+ * Due to a bug with the terraform provider, manually delete the Autoscaling group when destroying the infrastructure.  See [#5278](https://github.com/hashicorp/terraform-provider-aws/issues/5278).
  *
  * ## Terraform Version
  *
@@ -91,9 +104,10 @@ resource "aws_launch_configuration" "main" {
     iops                  = 0
   }
 
-  user_data = templatefile(format("%s/userdata.tpl", path.module), {
+  user_data = length(var.user_data) > 0 ? var.user_data : templatefile(format("%s/userdata.tpl", path.module), {
     ecs_cluster = var.name,
     region      = data.aws_region.current.name
+    tags        = merge(var.tags, { Name = var.name })
   })
 
   metadata_options {

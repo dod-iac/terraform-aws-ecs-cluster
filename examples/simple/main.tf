@@ -19,7 +19,7 @@ resource "aws_eip" "nat" {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "2.78.0"
+  version = "3.1.0"
 
   name = format("app-vpc-%s", var.test_name)
   cidr = "10.0.0.0/16"
@@ -42,44 +42,7 @@ module "vpc" {
   # DHCP
   enable_dhcp_options = true
 
-  # VPC endpoint for KMS
-  enable_kms_endpoint              = true
-  kms_endpoint_private_dns_enabled = true
-  kms_endpoint_security_group_ids  = [aws_security_group.endpoint.id]
-
-  # VPC endpoint for Logs
-  enable_logs_endpoint              = true
-  logs_endpoint_private_dns_enabled = true
-  logs_endpoint_security_group_ids  = [aws_security_group.endpoint.id]
-
-  # VPC endpoint for S3
-  enable_s3_endpoint = true
-
-  # VPC Endpoint for ECR API
-  enable_ecr_api_endpoint              = true
-  ecr_api_endpoint_private_dns_enabled = true
-  ecr_api_endpoint_security_group_ids  = [aws_security_group.endpoint.id]
-
-  # VPC Endpoint for ECR Docker
-  enable_ecr_dkr_endpoint              = true
-  ecr_dkr_endpoint_private_dns_enabled = true
-  ecr_dkr_endpoint_security_group_ids  = [aws_security_group.endpoint.id]
-
-  # VPC Endpoint for ECS API
-  enable_ecs_endpoint              = true
-  ecs_endpoint_private_dns_enabled = true
-  ecs_endpoint_security_group_ids  = [aws_security_group.endpoint.id]
-
-  # VPC Endpoint for ECS Agent API
-  enable_ecs_agent_endpoint              = true
-  ecs_agent_endpoint_private_dns_enabled = true
-  ecs_agent_endpoint_security_group_ids  = [aws_security_group.endpoint.id]
-
-  # VPC Endpoint for ECS Telemetry API
-  enable_ecs_telemetry_endpoint              = true
-  ecs_telemetry_endpoint_private_dns_enabled = true
-  ecs_telemetry_endpoint_security_group_ids  = [aws_security_group.endpoint.id]
-
+  # Tags
   tags = var.tags
 }
 
@@ -99,7 +62,7 @@ resource "aws_iam_instance_profile" "ecs_instance_role" {
 }
 
 module "ecs_cluster" {
-  source  = "../../"
+  source = "../../"
 
   desired_capacity = 1
   min_size         = 1
@@ -113,4 +76,32 @@ module "ecs_cluster" {
   target_capacity               = 70
   tags                          = var.tags
   vpc_id                        = module.vpc.vpc_id
+}
+
+
+#
+# The following resources are used for testing.
+#
+
+resource "aws_cloudwatch_log_group" "main" {
+  name              = format("/aws/ecs/%s", var.test_name)
+  retention_in_days = 1 # expire logs after 1 day
+  tags              = var.tags
+}
+
+module "ecs_task_execution_role" {
+  source  = "dod-iac/ecs-task-execution-role/aws"
+  version = "1.0.0"
+
+  cloudwatch_log_group_names = [aws_cloudwatch_log_group.main.name]
+  name                       = format("ecs-task-execution-role-%s", var.test_name)
+  tags                       = var.tags
+}
+
+module "ecs_task_role" {
+  source  = "dod-iac/ecs-task-role/aws"
+  version = "1.0.0"
+
+  name = format("ecs-task-role-%s", var.test_name)
+  tags = var.tags
 }
