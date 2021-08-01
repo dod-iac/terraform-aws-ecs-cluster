@@ -1,5 +1,17 @@
 #!/bin/bash
+
+# =================================================================
+#
+# Work of the U.S. Department of Defense, Defense Digital Service.
+# Released as open source under the MIT License.  See LICENSE file.
+#
+# =================================================================
+
+# User data script written for use with an Amazon Linux 2 EC2 instance
+
 set -euxo pipefail
+
+# Create and initialize log
 touch /var/log/startup.log
 chmod 664 /var/log/startup.log
 echo "* Starting provisioning" >> /var/log/startup.log 2>&1
@@ -13,8 +25,10 @@ amazon-linux-extras install -y ecs >> /var/log/startup.log 2>&1
 mkdir -p /etc/ecs
 echo 'ECS_CLUSTER=${ecs_cluster}' >> /etc/ecs/ecs.config
 echo 'ECS_DISABLE_PRIVILEGED=true' >> /etc/ecs/ecs.config
+echo 'ECS_CONTAINER_INSTANCE_TAGS=${jsonencode(tags)}' >> /etc/ecs/ecs.config
 # Update shell
 echo "export AWS_DEFAULT_REGION=${region}" >> /home/ec2-user/.bash_profile
 # Starting ECS Service
 systemctl enable --now --no-block ecs.service >> /var/log/startup.log 2>&1
+# Mark that user data script finished execution
 echo "Done" >> /var/log/startup.log 2>&1

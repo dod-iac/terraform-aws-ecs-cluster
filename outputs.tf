@@ -1,6 +1,21 @@
+output "autoscaling_group_arn" {
+  description = "The ARN of the EC2 Auto Scaling group."
+  value       = aws_autoscaling_group.main.arn
+}
+
+output "autoscaling_group_name" {
+  description = "The name of the EC2 Auto Scaling group."
+  value       = aws_autoscaling_group.main.name
+}
+
 output "ecs_cluster_arn" {
   description = "The Amazon Resource Name (ARN) of the AWS ECS cluster."
   value       = aws_ecs_cluster.main.arn
+}
+
+output "ecs_cluster_name" {
+  description = "The name of the AWS ECS cluster."
+  value       = aws_ecs_cluster.main.name
 }
 
 output "security_group_id" {
