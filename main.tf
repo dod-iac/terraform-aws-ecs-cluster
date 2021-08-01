@@ -37,7 +37,7 @@
  * }
  * ```
  *
- * By default, the ECS Cluster bootstraps Amazon Linux 2 images.  If using a custom AMI, modify the `image_id` and `user_data` variables as applicable.  If using AWS GovCloud, `ami-b1e0dad0` is equivalent to the default image in AWS commercial.
+ * By default, the ECS Cluster bootstraps Amazon Linux 2 images.  If using a custom AMI, modify the `image_id` and `user_data` variables as applicable.  If using AWS GovCloud, `ami-b1e0dad0` is equivalent to the default Amazon Linux 2 image in AWS commercial.
  *
  * Changes to the desired_capacity, min_size, and max_size configuration of the Auto Scaling group are ignored by Terraform.  These parameters can be updated via the AWS Console, API, or CLI.
  *

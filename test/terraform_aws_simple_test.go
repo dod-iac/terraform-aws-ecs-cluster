@@ -21,6 +21,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
 	"github.com/aws/aws-sdk-go/service/ecs"
 )
@@ -68,17 +69,50 @@ func TestTerraformSimpleExample(t *testing.T) {
 		defer terraform.Destroy(t, terraformOptions)
 	}
 
-	// InitAndApply runs "terraform init" and then "terraform apply"
-	terraform.InitAndApply(t, terraformOptions)
+	// Init runs terraform init"
+	terraform.Init(t, terraformOptions)
+
+	// terratest has no command for refresh.
+	// Run this to update the state file with changes made outside of terraform.
+	terraform.RunTerraformCommandE(
+		t,
+		terraformOptions,
+		terraform.FormatArgs(terraformOptions, "refresh", "-input=false", "-lock=false")...)
+
+	s := session.Must(session.NewSession())
+
+	// Due to a bug with the terraform provider,
+	// we need to manually delete the previous auto scaling group, if it exists.
+	// See [#5278](https://github.com/hashicorp/terraform-provider-aws/issues/5278).
+
+	// Get name of existing autoscaling group, if one exists
+	autoScalingGroupName, _ := terraform.OutputE(t, terraformOptions, "autoscaling_group_name")
+
+	// Delete existing autoscaling group, if one exists
+	if autoScalingGroupName != "<nil>" {
+		// Create client for EC2 Auto Scaling
+		as := autoscaling.New(s, aws.NewConfig().WithRegion(region))
+		// Delete EC2 Auto Scaling group if one exists
+		t.Logf("Deleting EC2 Auto Scaling group %q", autoScalingGroupName)
+		_, deleteAutoScalingGroupError := as.DeleteAutoScalingGroup(&autoscaling.DeleteAutoScalingGroupInput{
+			AutoScalingGroupName: aws.String(autoScalingGroupName),
+			ForceDelete:          aws.Bool(true),
+		})
+		// Check that no error occured when deleting the auto scaling group
+		require.NoError(t, deleteAutoScalingGroupError)
+	}
+
+	// Apply runs terraform apply"
+	terraform.Apply(t, terraformOptions)
 
 	ecsClusterARN := terraform.Output(t, terraformOptions, "ecs_cluster_arn")
 	ecsClusterName := terraform.Output(t, terraformOptions, "ecs_cluster_name")
 
-	s := session.Must(session.NewSession())
-
 	c := ecs.New(s, aws.NewConfig().WithRegion(region))
 
 	logs := cloudwatchlogs.New(s, aws.NewConfig().WithRegion(region))
+
+	t.Logf("Describing ECS Cluster %q", ecsClusterName)
 
 	describeClustersOutput, describeClustersError := c.DescribeClusters(&ecs.DescribeClustersInput{
 		Clusters: []*string{
@@ -98,6 +132,8 @@ func TestTerraformSimpleExample(t *testing.T) {
 	cloudwatchLogGroupName := terraform.Output(t, terraformOptions, "cloudwatch_log_group_name")
 	ecsTaskExecutionRoleArn := terraform.Output(t, terraformOptions, "ecs_task_execution_role_arn")
 	ecsTaskRoleArn := terraform.Output(t, terraformOptions, "ecs_task_role_arn")
+
+	t.Logf("Registering ECS task definition")
 
 	registerTaskDefinitionOutput, registerTaskDefinitionError := c.RegisterTaskDefinition(&ecs.RegisterTaskDefinitionInput{
 		ContainerDefinitions: []*ecs.ContainerDefinition{
@@ -158,6 +194,7 @@ func TestTerraformSimpleExample(t *testing.T) {
 	}
 
 	// Wait for EC2-backed container instance to spin up.
+	t.Logf("Waiting for ECS cluster to hydrate")
 	for i := 0; true; i++ {
 		listContainerInstancesOutput, listContainerInstancesError := c.ListContainerInstances(&ecs.ListContainerInstancesInput{
 			Cluster: aws.String(ecsClusterName),
@@ -168,10 +205,12 @@ func TestTerraformSimpleExample(t *testing.T) {
 			break
 		}
 		time.Sleep(15 * time.Second)
-		if i == 12 {
-			require.Fail(t, "ECS Cluster had no instances after 1 minute")
+		if i == 16 {
+			require.Fail(t, "ECS Cluster had no instances after 4 minutes")
 		}
 	}
+
+	t.Logf("Running ECS task")
 
 	runTaskOutput, runTaskError := c.RunTask(&ecs.RunTaskInput{
 		Cluster:        aws.String(ecsClusterName),
@@ -184,12 +223,19 @@ func TestTerraformSimpleExample(t *testing.T) {
 	require.Len(t, runTaskOutput.Failures, 0)
 
 	// Wait for log messages to be saved
-	time.Sleep(15 * time.Second)
-
-	filterLogEventsOutput, filterLogEventsError := logs.FilterLogEvents(&cloudwatchlogs.FilterLogEventsInput{
-		LogGroupName: aws.String(cloudwatchLogGroupName),
-	})
-	require.NoError(t, filterLogEventsError)
-	require.Len(t, filterLogEventsOutput.Events, 1)
-	require.Equal(t, message, aws.StringValue(filterLogEventsOutput.Events[0].Message))
+	t.Logf("Waiting for log messages to be saved")
+	for i := 0; true; i++ {
+		filterLogEventsOutput, filterLogEventsError := logs.FilterLogEvents(&cloudwatchlogs.FilterLogEventsInput{
+			LogGroupName: aws.String(cloudwatchLogGroupName),
+		})
+		require.NoError(t, filterLogEventsError)
+		if len(filterLogEventsOutput.Events) > 0 {
+			require.Equal(t, message, aws.StringValue(filterLogEventsOutput.Events[0].Message))
+			break
+		}
+		time.Sleep(1 * time.Second)
+		if i == 30 {
+			require.Fail(t, "ECS task had no logs after 30 seconds")
+		}
+	}
 }
