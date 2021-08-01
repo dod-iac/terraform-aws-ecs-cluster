@@ -74,10 +74,11 @@ func TestTerraformSimpleExample(t *testing.T) {
 
 	// terratest has no command for refresh.
 	// Run this to update the state file with changes made outside of terraform.
-	terraform.RunTerraformCommandE(
+	_, refreshError := terraform.RunTerraformCommandE(
 		t,
 		terraformOptions,
 		terraform.FormatArgs(terraformOptions, "refresh", "-input=false", "-lock=false")...)
+	require.NoError(t, refreshError)
 
 	s := session.Must(session.NewSession())
 
