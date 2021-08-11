@@ -101,6 +101,9 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_associate_public_ip_address"></a> [associate\_public\_ip\_address](#input\_associate\_public\_ip\_address) | Associate a public ip address with an instance in a VPC | `bool` | `false` | no |
+| <a name="input_autoscaling_enabled_metrics"></a> [autoscaling\_enabled\_metrics](#input\_autoscaling\_enabled\_metrics) | Metrics enabled by default for the autoscaling group | `list(string)` | <pre>[<br>  "GroupAndWarmPoolDesiredCapacity",<br>  "GroupAndWarmPoolTotalCapacity",<br>  "GroupDesiredCapacity",<br>  "GroupInServiceCapacity",<br>  "GroupInServiceInstances",<br>  "GroupMaxSize",<br>  "GroupMinSize",<br>  "GroupPendingCapacity",<br>  "GroupPendingInstances",<br>  "GroupStandbyCapacity",<br>  "GroupStandbyInstances",<br>  "GroupTerminatingCapacity",<br>  "GroupTerminatingInstances",<br>  "GroupTotalCapacity",<br>  "GroupTotalInstances",<br>  "WarmPoolDesiredCapacity",<br>  "WarmPoolMinSize",<br>  "WarmPoolPendingCapacity",<br>  "WarmPoolTerminatingCapacity",<br>  "WarmPoolTotalCapacity",<br>  "WarmPoolWarmedCapacity"<br>]</pre> | no |
+| <a name="input_autoscaling_protect_from_scale_in"></a> [autoscaling\_protect\_from\_scale\_in](#input\_autoscaling\_protect\_from\_scale\_in) | Allows setting instance protection. The Auto Scaling Group will not select instances with this setting for termination during scale in events. | `bool` | `true` | no |
 | <a name="input_aws_launch_configuration_name_prefix"></a> [aws\_launch\_configuration\_name\_prefix](#input\_aws\_launch\_configuration\_name\_prefix) | The prefix of the name of the AWS Launch configuration. If not specified, defaults to the value of "name-". | `string` | `""` | no |
 | <a name="input_desired_capacity"></a> [desired\_capacity](#input\_desired\_capacity) | The number of Amazon EC2 instances that should be running in the group. | `number` | `1` | no |
 | <a name="input_iam_instance_profile"></a> [iam\_instance\_profile](#input\_iam\_instance\_profile) | n/a | `string` | n/a | yes |
@@ -111,6 +114,7 @@ No modules.
 | <a name="input_min_size"></a> [min\_size](#input\_min\_size) | The minimum size of the Auto Scaling Group. | `number` | `1` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the cluster (up to 255 letters, numbers, hyphens, and underscores). | `string` | n/a | yes |
 | <a name="input_root_block_device_volume_size"></a> [root\_block\_device\_volume\_size](#input\_root\_block\_device\_volume\_size) | Size of the root block device volume in gibibytes (GiB) used by the EC2 instances in the ECS cluster. | `number` | `32` | no |
+| <a name="input_security_groups"></a> [security\_groups](#input\_security\_groups) | Additional security groups to add to the launch configuration | `list(string)` | `[]` | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | The ids of the VPC subnets used by the EC2 instances in the ECS cluster. | `list(string)` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to resources part of the ECS Cluster. | `map(string)` | `{}` | no |
 | <a name="input_target_capacity"></a> [target\_capacity](#input\_target\_capacity) | The target utilization for the capacity provider. A number between 1 and 100. | `number` | `50` | no |

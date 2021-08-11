@@ -81,3 +81,49 @@ variable "vpc_id" {
   type        = string
   description = "The id of the VPC used by the EC2 instances in the ECS cluster."
 }
+
+variable "security_groups" {
+  type        = list(string)
+  default     = []
+  description = "Additional security groups to add to the launch configuration"
+}
+
+variable "autoscaling_protect_from_scale_in" {
+  type        = bool
+  default     = true
+  description = "Allows setting instance protection. The Auto Scaling Group will not select instances with this setting for termination during scale in events."
+}
+
+variable "autoscaling_enabled_metrics" {
+  type = list(string)
+  default = [
+    "GroupAndWarmPoolDesiredCapacity",
+    "GroupAndWarmPoolTotalCapacity",
+    "GroupDesiredCapacity",
+    "GroupInServiceCapacity",
+    "GroupInServiceInstances",
+    "GroupMaxSize",
+    "GroupMinSize",
+    "GroupPendingCapacity",
+    "GroupPendingInstances",
+    "GroupStandbyCapacity",
+    "GroupStandbyInstances",
+    "GroupTerminatingCapacity",
+    "GroupTerminatingInstances",
+    "GroupTotalCapacity",
+    "GroupTotalInstances",
+    "WarmPoolDesiredCapacity",
+    "WarmPoolMinSize",
+    "WarmPoolPendingCapacity",
+    "WarmPoolTerminatingCapacity",
+    "WarmPoolTotalCapacity",
+    "WarmPoolWarmedCapacity",
+  ]
+  description = "Metrics enabled by default for the autoscaling group"
+}
+
+variable "associate_public_ip_address" {
+  type        = bool
+  default     = false
+  description = "Associate a public ip address with an instance in a VPC"
+}

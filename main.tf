@@ -86,14 +86,14 @@ resource "aws_security_group" "main" {
 }
 
 resource "aws_launch_configuration" "main" {
-  associate_public_ip_address      = false
+  associate_public_ip_address      = var.associate_public_ip_address
   ebs_optimized                    = false
   iam_instance_profile             = var.iam_instance_profile
   instance_type                    = var.instance_type
   image_id                         = var.image_id
   key_name                         = length(var.key_name) > 0 ? var.key_name : null
   name_prefix                      = length(var.aws_launch_configuration_name_prefix) > 0 ? var.aws_launch_configuration_name_prefix : format("%s-", var.name)
-  security_groups                  = [aws_security_group.main.id]
+  security_groups                  = concat([aws_security_group.main.id], var.security_groups)
   vpc_classic_link_security_groups = []
 
   root_block_device {
@@ -127,10 +127,13 @@ resource "aws_autoscaling_group" "main" {
   max_size              = var.max_size
   min_size              = var.min_size
   name                  = var.name
-  protect_from_scale_in = true
+  protect_from_scale_in = var.autoscaling_protect_from_scale_in
   tags                  = [for k, v in merge(var.tags, { Name = var.name, AmazonECSManaged = "" }) : { "key" : k, "value" : v, "propagate_at_launch" : true }]
   termination_policies  = ["OldestLaunchConfiguration", "Default"]
   vpc_zone_identifier   = var.subnet_ids
+
+  metrics_granularity = "1Minute" // Only valid value
+  enabled_metrics     = var.autoscaling_enabled_metrics
 
   lifecycle {
     create_before_destroy = true
@@ -159,9 +162,15 @@ resource "aws_ecs_cluster" "main" {
   capacity_providers = [aws_ecs_capacity_provider.main.name]
   name               = var.name
   tags               = var.tags
+
   default_capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.main.name
     weight            = 1
     base              = 0
+  }
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
   }
 }
