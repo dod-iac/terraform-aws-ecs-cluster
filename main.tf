@@ -158,6 +158,11 @@ resource "aws_ecs_capacity_provider" "main" {
   }
 }
 
+resource "aws_kms_key" "exec_command" {
+  description             = format("%s-exec-command", var.name)
+  deletion_window_in_days = 7
+}
+
 resource "aws_ecs_cluster" "main" {
   capacity_providers = [aws_ecs_capacity_provider.main.name]
   name               = var.name
@@ -169,8 +174,16 @@ resource "aws_ecs_cluster" "main" {
     base              = 0
   }
 
-  setting {
-    name  = "containerInsights"
-    value = "enabled"
+  configuration {
+    execute_command_configuration {
+      kms_key_id = aws_kms_key.exec_command.arn
+      logging    = "DEFAULT"
+    }
   }
+
+  # Note: Container insights not available for EC2, only FARGATE
+  # setting {
+  #   name  = "containerInsights"
+  #   value = "enabled"
+  # }
 }
