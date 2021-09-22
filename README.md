@@ -93,9 +93,13 @@ No modules.
 | [aws_autoscaling_group.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group) | resource |
 | [aws_ecs_capacity_provider.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_capacity_provider) | resource |
 | [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
+| [aws_kms_alias.exec_command](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_key.exec_command](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
 | [aws_launch_configuration.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_configuration) | resource |
 | [aws_security_group.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_iam_policy_document.exec_command](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ## Inputs
@@ -128,6 +132,9 @@ No modules.
 |------|-------------|
 | <a name="output_autoscaling_group_arn"></a> [autoscaling\_group\_arn](#output\_autoscaling\_group\_arn) | The ARN of the EC2 Auto Scaling group. |
 | <a name="output_autoscaling_group_name"></a> [autoscaling\_group\_name](#output\_autoscaling\_group\_name) | The name of the EC2 Auto Scaling group. |
+| <a name="output_aws_kms_alias_arn_exec_command"></a> [aws\_kms\_alias\_arn\_exec\_command](#output\_aws\_kms\_alias\_arn\_exec\_command) | The Amazon Resource Name (ARN) of the Execute Command key alias. |
+| <a name="output_aws_kms_alias_name_exec_command"></a> [aws\_kms\_alias\_name\_exec\_command](#output\_aws\_kms\_alias\_name\_exec\_command) | The display name of the Execute Command alias. |
+| <a name="output_aws_kms_key_arn_exec_command"></a> [aws\_kms\_key\_arn\_exec\_command](#output\_aws\_kms\_key\_arn\_exec\_command) | The Amazon Resource Name (ARN) of the Execute Command key. |
 | <a name="output_ecs_cluster_arn"></a> [ecs\_cluster\_arn](#output\_ecs\_cluster\_arn) | The Amazon Resource Name (ARN) of the AWS ECS cluster. |
 | <a name="output_ecs_cluster_name"></a> [ecs\_cluster\_name](#output\_ecs\_cluster\_name) | The name of the AWS ECS cluster. |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The id of the AWS Security Group for the AWS ECS cluster. |
