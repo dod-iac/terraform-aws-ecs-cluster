@@ -69,6 +69,10 @@
  * This project constitutes a work of the United States Government and is not subject to domestic copyright protection under 17 USC § 105.  However, because the project utilizes code licensed from contributors and other third parties, it therefore is licensed under the MIT License.  See LICENSE file for more information.
  */
 
+data "aws_caller_identity" "current" {}
+
+data "aws_partition" "current" {}
+
 data "aws_region" "current" {}
 
 resource "aws_security_group" "main" {
@@ -158,9 +162,38 @@ resource "aws_ecs_capacity_provider" "main" {
   }
 }
 
+data "aws_iam_policy_document" "exec_command" {
+  policy_id = "key-policy-exec-command"
+  statement {
+    sid    = "Enable IAM User Permissions"
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        format(
+          "arn:%s:iam::%s:root",
+          data.aws_partition.current.partition,
+          data.aws_caller_identity.current.account_id
+        )
+      ]
+    }
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+}
+
+
 resource "aws_kms_key" "exec_command" {
   description             = format("%s-exec-command", var.name)
   deletion_window_in_days = 7
+  enable_key_rotation     = true
+  policy                  = data.aws_iam_policy_document.exec_command.json
+  tags                    = var.tags
+}
+
+resource "aws_kms_alias" "exec_command" {
+  name          = format("alias/%s-exec-command", var.name)
+  target_key_id = aws_kms_key.exec_command.key_id
 }
 
 resource "aws_ecs_cluster" "main" {
