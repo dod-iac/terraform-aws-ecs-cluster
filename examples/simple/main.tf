@@ -19,7 +19,7 @@ resource "aws_eip" "nat" {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "3.1.0"
+  version = "3.14.2"
 
   name = format("app-vpc-%s", var.test_name)
   cidr = "10.0.0.0/16"
@@ -48,7 +48,7 @@ module "vpc" {
 
 module "ecs_instance_role" {
   source  = "dod-iac/ec2-instance-role/aws"
-  version = "1.0.1"
+  version = "1.0.3"
 
   allow_ecs = true
   name      = format("app-ecs-instance-role-%s", var.test_name)
@@ -91,7 +91,7 @@ resource "aws_cloudwatch_log_group" "main" {
 
 module "ecs_task_execution_role" {
   source  = "dod-iac/ecs-task-execution-role/aws"
-  version = "1.0.0"
+  version = "1.0.1"
 
   cloudwatch_log_group_names = [aws_cloudwatch_log_group.main.name]
   name                       = format("ecs-task-execution-role-%s", var.test_name)
@@ -100,7 +100,7 @@ module "ecs_task_execution_role" {
 
 module "ecs_task_role" {
   source  = "dod-iac/ecs-task-role/aws"
-  version = "1.0.0"
+  version = "1.0.1"
 
   name = format("ecs-task-role-%s", var.test_name)
   tags = var.tags
