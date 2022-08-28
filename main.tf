@@ -98,7 +98,6 @@ resource "aws_launch_configuration" "main" {
   key_name                         = length(var.key_name) > 0 ? var.key_name : null
   name_prefix                      = length(var.aws_launch_configuration_name_prefix) > 0 ? var.aws_launch_configuration_name_prefix : format("%s-", var.name)
   security_groups                  = concat([aws_security_group.main.id], var.security_groups)
-  vpc_classic_link_security_groups = []
 
   root_block_device {
     volume_type           = "standard"
