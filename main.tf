@@ -233,7 +233,7 @@ resource "aws_ecs_cluster" "main" {
   # }
 }
 
-resource "aws_ecs_cluster_capacity_providers" "example" {
+resource "aws_ecs_cluster_capacity_providers" "main" {
   capacity_providers = [aws_ecs_capacity_provider.main.name]
   cluster_name       = aws_ecs_cluster.main.name
 
