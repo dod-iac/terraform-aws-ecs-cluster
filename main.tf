@@ -90,14 +90,14 @@ resource "aws_security_group" "main" {
 }
 
 resource "aws_launch_configuration" "main" {
-  associate_public_ip_address      = var.associate_public_ip_address
-  ebs_optimized                    = false
-  iam_instance_profile             = var.iam_instance_profile
-  instance_type                    = var.instance_type
-  image_id                         = var.image_id
-  key_name                         = length(var.key_name) > 0 ? var.key_name : null
-  name_prefix                      = length(var.aws_launch_configuration_name_prefix) > 0 ? var.aws_launch_configuration_name_prefix : format("%s-", var.name)
-  security_groups                  = concat([aws_security_group.main.id], var.security_groups)
+  associate_public_ip_address = var.associate_public_ip_address
+  ebs_optimized               = false
+  iam_instance_profile        = var.iam_instance_profile
+  instance_type               = var.instance_type
+  image_id                    = var.image_id
+  key_name                    = length(var.key_name) > 0 ? var.key_name : null
+  name_prefix                 = length(var.aws_launch_configuration_name_prefix) > 0 ? var.aws_launch_configuration_name_prefix : format("%s-", var.name)
+  security_groups             = concat([aws_security_group.main.id], var.security_groups)
 
   root_block_device {
     volume_type           = "standard"
@@ -131,12 +131,32 @@ resource "aws_autoscaling_group" "main" {
   min_size              = var.min_size
   name                  = var.name
   protect_from_scale_in = var.autoscaling_protect_from_scale_in
-  tags                  = [for k, v in merge(var.tags, { Name = var.name, AmazonECSManaged = "" }) : { "key" : k, "value" : v, "propagate_at_launch" : true }]
   termination_policies  = ["OldestLaunchConfiguration", "Default"]
   vpc_zone_identifier   = var.subnet_ids
 
   metrics_granularity = "1Minute" // Only valid value
   enabled_metrics     = var.autoscaling_enabled_metrics
+
+  tag {
+    key                 = "Name"
+    value               = var.name
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "AmazonECSManaged"
+    value               = ""
+    propagate_at_launch = true
+  }
+
+  dynamic "tag" {
+    for_each = [for k, v in var.tags : { "key" : k, "value" : v }]
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
 
   lifecycle {
     create_before_destroy = true
