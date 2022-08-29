@@ -216,15 +216,8 @@ resource "aws_kms_alias" "exec_command" {
 }
 
 resource "aws_ecs_cluster" "main" {
-  capacity_providers = [aws_ecs_capacity_provider.main.name]
-  name               = var.name
-  tags               = var.tags
-
-  default_capacity_provider_strategy {
-    capacity_provider = aws_ecs_capacity_provider.main.name
-    weight            = 1
-    base              = 0
-  }
+  name = var.name
+  tags = var.tags
 
   configuration {
     execute_command_configuration {
@@ -238,4 +231,15 @@ resource "aws_ecs_cluster" "main" {
   #   name  = "containerInsights"
   #   value = "enabled"
   # }
+}
+
+resource "aws_ecs_cluster_capacity_providers" "example" {
+  capacity_providers = [aws_ecs_capacity_provider.main.name]
+  cluster_name       = aws_ecs_cluster.main.name
+
+  default_capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.main.name
+    weight            = 1
+    base              = 0
+  }
 }
