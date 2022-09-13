@@ -14,10 +14,10 @@ No requirements.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_ecs_cluster"></a> [ecs\_cluster](#module\_ecs\_cluster) | ../../ | n/a |
-| <a name="module_ecs_instance_role"></a> [ecs\_instance\_role](#module\_ecs\_instance\_role) | dod-iac/ec2-instance-role/aws | 1.0.1 |
-| <a name="module_ecs_task_execution_role"></a> [ecs\_task\_execution\_role](#module\_ecs\_task\_execution\_role) | dod-iac/ecs-task-execution-role/aws | 1.0.0 |
-| <a name="module_ecs_task_role"></a> [ecs\_task\_role](#module\_ecs\_task\_role) | dod-iac/ecs-task-role/aws | 1.0.0 |
-| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 3.1.0 |
+| <a name="module_ecs_instance_role"></a> [ecs\_instance\_role](#module\_ecs\_instance\_role) | dod-iac/ec2-instance-role/aws | 1.0.3 |
+| <a name="module_ecs_task_execution_role"></a> [ecs\_task\_execution\_role](#module\_ecs\_task\_execution\_role) | dod-iac/ecs-task-execution-role/aws | 1.0.1 |
+| <a name="module_ecs_task_role"></a> [ecs\_task\_role](#module\_ecs\_task\_role) | dod-iac/ecs-task-role/aws | 1.0.1 |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | 3.14.2 |
 
 ## Resources
 
